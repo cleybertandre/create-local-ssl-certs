@@ -1,30 +1,51 @@
 #!/usr/bin/env bash
 
+if [ ! -f .env ]; then
+  echo 'Error: .env file not found.'
+  exit;
+fi
+
 source .env
+
+display_debug_info() {
+    echo ""
+    echo "Showing all variables and quitting:"
+    echo ""
+    echo "APACHE_CONF_PATH=${APACHE_CONF_PATH}/"
+    echo "APACHE_CA_FOLDER=${APACHE_CONF_PATH}/${APACHE_CA_FOLDER}/"
+    echo "APACHE_CRT_FOLDER=${APACHE_CONF_PATH}/${APACHE_CRT_FOLDER}/"
+    echo "APACHE_CSR_FOLDER=${APACHE_CONF_PATH}/${APACHE_CSR_FOLDER}/"
+    echo "APACHE_KEYS_FOLDER=${APACHE_CONF_PATH}/${APACHE_KEYS_FOLDER}/"
+}
+
+if [ "$1" == "-h" ] ; then
+    display_debug_info
+    exit 0
+fi
 
 if [ -z "$1" ]
 then
-  echo "Please supply a subdomain to create a certificate for";
-  echo "e.g. www.mysite.com"
+  echo "Error: Please supply a domain to create a certificate for.";
+  echo "e.g. create_certificate_for_domain.sh www.candre.dev"
   exit;
 fi
 
 if [ ! -f $APACHE_CONF_PATH/$APACHE_CA_FOLDER/rootCA.pem ]; then
-  echo 'Please run "create_root_cert_and_key.sh" first, and try again!'
-  exit;
-fi
-if [ ! -f v3.ext ]; then
-  echo 'Please download the "v3.ext" file and try again!'
+  echo 'Error: File rootCA.pem not found. Please run "create_root_cert_and_key.sh" first, then try again!'
   exit;
 fi
 
-# echo "APACHE_CONF_PATH=${APACHE_CONF_PATH}"
-# echo "APACHE_CA_FOLDER=${APACHE_CONF_PATH}/${APACHE_CA_FOLDER}"
-# echo "APACHE_CRT_FOLDER=${APACHE_CONF_PATH}/${APACHE_CRT_FOLDER}"
-# echo "APACHE_CSR_FOLDER=${APACHE_CONF_PATH}/${APACHE_CSR_FOLDER}"
-# echo "APACHE_KEYS_FOLDER=${APACHE_CONF_PATH}/${APACHE_KEYS_FOLDER}"
-# exit;
-  
+if [ ! -f v3.ext ]; then
+  echo 'Error: File v3.ext not found.'
+  exit;
+fi
+
+
+if [ "$1" == "-h" ] ; then
+    echo "Usage: `basename $0` [-h]"
+    exit 0
+fi
+
 # Create a new private key if one doesnt exist, or use the xeisting one if it does
 if [ -f $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER/device.key ]; then
   KEY_OPT="-key"
@@ -52,11 +73,17 @@ rm -f $APACHE_CONF_PATH/$APACHE_CRT_FOLDER/device.crt;
 rm -f v3.ext.tmp;
 
 echo 
-echo "###########################################################################"
-echo Done! 
-echo "###########################################################################"
-echo "To use these files on your server, simply copy both $DOMAIN.csr and"
-echo "device.key to your webserver, and use like so (if Apache, for example)"
-echo 
-echo "    SSLCertificateFile    /path_to_your_files/$DOMAIN.crt"
-echo "    SSLCertificateKeyFile /path_to_your_files/device.key"
+echo "#############################################"
+echo "Done!"
+echo "#############################################"
+echo "Example of SSL directives into vhosts.conf:"
+echo ""
+echo "    <Directory /var/www>"
+echo "        ..."
+echo "    </Directory>"
+echo ""
+echo "    SSLEngine on"
+echo "    SSLProtocol All -SSLv2 -SSLv3"
+echo "    SSLCertificateFile    conf/ssl.crt/$DOMAIN.crt"
+echo "    SSLCertificateKeyFile conf/ssl.key/device.key"
+echo "    SSLCACertificateFile  conf/ssl.ca/rootCA.pem"
