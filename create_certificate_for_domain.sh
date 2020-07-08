@@ -58,9 +58,32 @@ COMMON_NAME=$1
 SUBJECT="/C=CA/ST=None/L=NB/O=None/CN=$COMMON_NAME"
 NUM_OF_DAYS=825
 
-openssl req -new -newkey rsa:2048 -sha256 -nodes $KEY_OPT $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER/device.key -subj "$SUBJECT" -out $APACHE_CONF_PATH/$APACHE_CSR_FOLDER/device.csr
+# create folders if not exists
+mkdir -p $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER
+mkdir -p $APACHE_CONF_PATH/$APACHE_CSR_FOLDER
+mkdir -p $APACHE_CONF_PATH/$APACHE_CRT_FOLDER
+
+# create certificates itself
+openssl req \
+-new \
+-newkey rsa:2048 \
+-sha256 \
+-nodes \
+$KEY_OPT $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER/device.key \
+-subj "$SUBJECT" \
+-out $APACHE_CONF_PATH/$APACHE_CSR_FOLDER/device.csr
+
 cat v3.ext | sed s/%%DOMAIN%%/"$COMMON_NAME"/g > v3.ext.tmp
-openssl x509 -req -in $APACHE_CONF_PATH/$APACHE_CSR_FOLDER/device.csr -CA $APACHE_CONF_PATH/$APACHE_CA_FOLDER/rootCA.pem -CAkey $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER/rootCA.key -CAcreateserial -out $APACHE_CONF_PATH/$APACHE_CRT_FOLDER/device.crt -days $NUM_OF_DAYS -sha256 -extfile v3.ext.tmp
+
+openssl x509 \
+-req \
+-in $APACHE_CONF_PATH/$APACHE_CSR_FOLDER/device.csr \
+-CA $APACHE_CONF_PATH/$APACHE_CA_FOLDER/rootCA.pem \
+-CAkey $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER/rootCA.key \
+-CAcreateserial \
+-out $APACHE_CONF_PATH/$APACHE_CRT_FOLDER/device.crt \
+-days $NUM_OF_DAYS \
+-sha256 -extfile v3.ext.tmp
 
 # move output files to final filenames
 mv $APACHE_CONF_PATH/$APACHE_CSR_FOLDER/device.csr "$APACHE_CONF_PATH/$APACHE_CSR_FOLDER/$DOMAIN.csr"
