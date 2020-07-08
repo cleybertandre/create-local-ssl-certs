@@ -1,10 +1,10 @@
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-extendedKeyUsage = serverAuth
+extendedKeyUsage = serverAuth,clientAuth
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = 127.0.0.1
-DNS.2 = localhost
-DNS.3 = %%DOMAIN%%
+DNS.1 = %%DOMAIN%%
+DNS.2 = www.%%DOMAIN%%
+DNS.3 = 192.168.0.15
