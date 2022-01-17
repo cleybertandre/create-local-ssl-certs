@@ -26,7 +26,7 @@ fi
 if [ -z "$1" ]
 then
   echo "Error: Please supply a domain to create a certificate for.";
-  echo "e.g. create_certificate_for_domain.sh www.candre.dev"
+  echo "e.g. create_certificate_for_domain.sh *.mydomain.dev"
   exit;
 fi
 
@@ -38,12 +38,6 @@ fi
 if [ ! -f v3.ext ]; then
   echo 'Error: File v3.ext not found.'
   exit;
-fi
-
-
-if [ "$1" == "-h" ] ; then
-    echo "Usage: `basename $0` [-h]"
-    exit 0
 fi
 
 # Create a new private key if one doesnt exist, or use the xeisting one if it does
@@ -110,3 +104,8 @@ echo "    SSLProtocol All -SSLv2 -SSLv3"
 echo "    SSLCertificateFile    conf/ssl.crt/$DOMAIN.crt"
 echo "    SSLCertificateKeyFile conf/ssl.key/device.key"
 echo "    SSLCACertificateFile  conf/ssl.ca/rootCA.pem"
+echo
+echo "Utils:"
+echo "> export CERT_DESTINY=/path/to/desired/folder/"
+echo "> mv $APACHE_CONF_PATH/*/$DOMAIN.* \$CERT_DESTINY"
+echo "> cp $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER/device.key \$CERT_DESTINY/$DOMAIN.key"

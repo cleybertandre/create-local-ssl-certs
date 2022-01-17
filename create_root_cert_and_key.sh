@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ ! -f .env ]; then
+  echo 'Error: .env file not found.'
+  exit;
+fi
+
 source .env
 
 mkdir -p $APACHE_CONF_PATH/$APACHE_KEYS_FOLDER;
